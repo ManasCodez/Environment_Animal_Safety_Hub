@@ -1,0 +1,20 @@
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--heading-color);
+    transition: color 0.3s ease;
+}
+
+section {
+    background-color: var(--section-bg);
+    transition: background-color 0.3s ease;
+}

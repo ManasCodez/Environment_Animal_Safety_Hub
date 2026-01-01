@@ -1,8 +1,8 @@
 /* Footer Container */
 .eco-footer {
-background: linear-gradient(120deg, #22c55e, #3b82f6);
+    background: var(--footer-bg);
 
-    color: white;
+    color: var(--footer-text);
     padding: 60px 20px 20px;
     font-family: Arial, sans-serif;
 }
@@ -26,7 +26,7 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
 .footer-desc {
     max-width: 260px;
     line-height: 1.5;
-    color: #e8fce8;
+    color: var(--footer-link);
     margin-bottom: 15px;
 }
 
@@ -36,11 +36,12 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
     font-size: 28px;
     margin-right: 12px;
     color: white;
+    /* Keep white icons for contrast on gradient */
     transition: 0.3s ease;
 }
 
 .footer-social .social:hover {
-    color: #b8ffb8;
+    color: var(--footer-link-hover);
     transform: scale(1.2);
 }
 
@@ -48,9 +49,10 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
 .footer-col h4 {
     font-size: 22px;
     margin-bottom: 10px;
-    border-bottom: 2px solid #b8ffb8;
+    border-bottom: 2px solid var(--footer-link-hover);
     display: inline-block;
     padding-bottom: 5px;
+    color: white;
 }
 
 .footer-col ul {
@@ -60,24 +62,24 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
 
 .footer-col ul li {
     margin: 10px 0;
-    color: #e6ffe6;
+    color: var(--footer-link);
 }
 
 .footer-col ul li a {
-    color: #e6ffe6;
+    color: var(--footer-link);
     text-decoration: none;
     transition: 0.3s;
 }
 
 .footer-col ul li a:hover {
-    color: #b8ffb8;
+    color: var(--footer-link-hover);
     margin-left: 5px;
 }
 
 /* Contact icons */
 .footer-col ul li i {
     margin-right: 8px;
-    color: #b8ffb8;
+    color: var(--footer-link-hover);
 }
 
 /* Bottom */
@@ -85,8 +87,8 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
     text-align: center;
     margin-top: 40px;
     padding-top: 10px;
-    border-top: 1px solid #b8ffb8;
-    color: #c7ffcf;
+    border-top: 1px solid var(--footer-link-hover);
+    color: var(--footer-link);
 }
 
 /* Responsive */
@@ -95,6 +97,7 @@ background: linear-gradient(120deg, #22c55e, #3b82f6);
         width: 100%;
         text-align: center;
     }
+
     .footer-logo {
         margin: auto;
     }
