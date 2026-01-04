@@ -1453,92 +1453,7 @@ body.dark-theme #scrollBottomBtn {
   background: linear-gradient(135deg, #4ade80, #22c55e);
 }
 
-.chatbot-container {
-  width: 320px;
-  position: fixed;
-  bottom: 90px;
-  right: 30px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  z-index: 1000;
-}
 
-body.dark-theme .chatbot-container {
-  background: #020617;
-}
-
-.chat-header {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-  padding: 14px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.chat-body {
-  height: 260px;
-  padding: 12px;
-  overflow-y: auto;
-  background: #f0fdf4;
-}
-
-body.dark-theme .chat-body {
-  background: #020617;
-}
-
-.chat-input {
-  display: flex;
-  padding: 10px;
-  gap: 6px;
-}
-
-.chat-input input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.chat-input button {
-  padding: 8px 12px;
-  background: #22c55e;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  cursor: pointer;
-}
-
-/* Messages */
-.user-message {
-  background: #22c55e;
-  color: white;
-  padding: 8px 10px;
-  border-radius: 12px;
-  margin: 6px 0;
-  text-align: right;
-}
-
-.bot-message {
-  background: #e5e7eb;
-  padding: 8px 10px;
-  border-radius: 12px;
-  margin: 6px 0;
-}
-
-body.dark-theme .bot-message {
-  background: #1e293b;
-  color: #e5e7eb;
-/* ===== CALCULATOR CTA SECTION ===== */
-.calculator-cta-section {
-  padding: 80px 0;
-  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-  position: relative;
-  overflow: hidden;
-}
-}
 .calculator-cta-section::before {
   content: '';
   position: absolute;
@@ -1728,4 +1643,109 @@ body.dark-theme .bot-message {
   background: #22c55e;
   color: white;
   cursor: pointer;
+}
+/* ================= ECOLIFE CHATBOT ================= */
+.ecolife-chatbot {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Toggle Button */
+.ecolife-chatbot .eco-toggle {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #34d399, #15803d);
+  border-radius: 50%;
+  color: white;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(34,197,94,0.6);
+}
+
+/* Chatbox */
+.ecolife-chatbot .eco-chatbox {
+  width: 330px;
+  height: 440px;
+  background: linear-gradient(180deg, #0f3d2e, #052e16);
+  border-radius: 16px;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+
+/* Header */
+.ecolife-chatbot .eco-header {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Body */
+.ecolife-chatbot .eco-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* Messages */
+.ecolife-chatbot .eco-bot,
+.ecolife-chatbot .eco-user {
+  max-width: 80%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.ecolife-chatbot .eco-bot {
+  background: #14532d;
+  color: #dcfce7;
+  align-self: flex-start;
+}
+
+.ecolife-chatbot .eco-user {
+  background: #22c55e;
+  color: white;
+  align-self: flex-end;
+}
+
+/* Input */
+.ecolife-chatbot .eco-input {
+  display: flex;
+  border-top: 1px solid #14532d;
+}
+
+.ecolife-chatbot .eco-input input {
+  flex: 1;
+  padding: 10px;
+  background: #022c22;
+  color: white;
+  border: none;
+  outline: none;
+}
+
+.ecolife-chatbot .eco-input button {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

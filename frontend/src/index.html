@@ -379,19 +379,7 @@
     </div>
   </section>
 
-  <!-- AI Chatbot -->
-<div class="chatbot-container">
-  <div class="chat-header">🌱 Eco AI Buddy</div>
-
-  <div class="chat-body" id="chatBody">
-    <div class="bot-message">Hi! I'm EcoBot 🌍 How can I help you?</div>
-  </div>
-
-  <div class="chat-input">
-    <input type="text" id="userInput" placeholder="Ask me something..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
-</div>
+ 
 
 
   <!-- Animal Section -->
@@ -1736,6 +1724,91 @@
       </div>
     </div>
   </div>
+
+  <!-- EcoLife Chatbot -->
+<div class="ecolife-chatbot">
+
+  <!-- Floating Button -->
+  <div class="eco-toggle" onclick="toggleEcoChat()">🌿</div>
+
+  <!-- Chat Window -->
+  <div class="eco-chatbox" id="ecoChat">
+    <div class="eco-header">
+      🌍 EcoLife Assistant
+      <span onclick="toggleEcoChat()">✖</span>
+    </div>
+
+    <div class="eco-body" id="ecoBody">
+      <div class="eco-bot">
+        Hi 👋 I’m your EcoLife guide 🌱  
+        Ask me about projects, sustainability, or how to contribute!
+      </div>
+    </div>
+
+    <div class="eco-input">
+      <input
+        type="text"
+        id="ecoInput"
+        placeholder="Ask about nature, projects..."
+        onkeypress="if(event.key==='Enter') sendEcoMessage()"
+      />
+      <button onclick="sendEcoMessage()">Send</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const ecoChat = document.getElementById("ecoChat");
+const ecoBody = document.getElementById("ecoBody");
+const ecoInput = document.getElementById("ecoInput");
+
+function toggleEcoChat() {
+  ecoChat.style.display =
+    ecoChat.style.display === "flex" ? "none" : "flex";
+}
+
+function sendEcoMessage() {
+  const text = ecoInput.value.trim();
+  if (!text) return;
+
+  addEcoMessage(text, "eco-user");
+  ecoInput.value = "";
+
+  setTimeout(() => ecoReply(text.toLowerCase()), 600);
+}
+
+function addEcoMessage(text, cls) {
+  const div = document.createElement("div");
+  div.className = cls;
+  div.textContent = text;
+  ecoBody.appendChild(div);
+  ecoBody.scrollTop = ecoBody.scrollHeight;
+}
+
+function ecoReply(msg) {
+  let reply =
+    "🌿 I’m here to help you explore EcoLife! Ask about projects, sustainability, or contributions.";
+
+  if (msg.includes("project")) {
+    reply = "🌍 We have eco projects like carbon calculators, Earth avatars, and green games.";
+  } 
+  else if (msg.includes("contribute")) {
+    reply = "🤝 You can contribute via GitHub by improving UI, adding features, or fixing bugs.";
+  } 
+  else if (msg.includes("earth")) {
+    reply = "🌎 The Earth avatar reflects environmental health based on user actions.";
+  }
+  else if (msg.includes("sustain")) {
+    reply = "♻️ Sustainability means protecting resources for future generations.";
+  }
+  else if (msg.includes("hello") || msg.includes("hi")) {
+    reply = "Hello 🌱 Let’s make the planet greener together!";
+  }
+
+  addEcoMessage(reply, "eco-bot");
+}
+</script>
+
 </body>
 
 </html>
