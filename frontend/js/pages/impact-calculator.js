@@ -1,555 +1,323 @@
-/* ===== ENVIRONMENTAL IMPACT CALCULATOR ===== */
-
-// Impact calculation coefficients (kg CO2 equivalent per year)
-const IMPACT_COEFFICIENTS = {
-    transport: {
-        walk: 0,
-        public: 500,
-        bike: 800,
-        car: 2000,
-        multiple: 4000
-    },
-    distance: {
-        low: 1,
-        medium: 1.5,
-        high: 2.5,
-        'very-high': 4
-    },
-    electricity: {
-        low: 300,
-        medium: 800,
-        high: 1500,
-        'very-high': 2500
-    },
-    hvac: {
-        none: 0,
-        minimal: 200,
-        moderate: 600,
-        heavy: 1200
-    },
-    diet: {
-        vegan: 600,
-        vegetarian: 900,
-        pescatarian: 1200,
-        omnivore: 1800,
-        'meat-heavy': 2500
-    },
-    'food-waste': {
-        minimal: 1,
-        some: 1.2,
-        moderate: 1.5,
-        high: 2
-    },
-    shower: {
-        short: 100,
-        medium: 200,
-        long: 350,
-        'very-long': 500
-    },
-    'water-conservation': {
-        excellent: 0.7,
-        good: 0.9,
-        average: 1.2,
-        poor: 1.5
-    },
-    plastic: {
-        minimal: 50,
-        low: 150,
-        moderate: 300,
-        high: 500
-    },
-    shopping: {
-        minimal: 200,
-        conscious: 400,
-        regular: 800,
-        frequent: 1500
-    }
-};
-
-// Recommendation database
-const RECOMMENDATIONS = {
-    transport: {
-        high: {
-            icon: 'fa-bicycle',
-            title: 'Switch to Eco-Friendly Transport',
-            description: 'Use public transport, cycling, or walking for short distances',
-            impact: '-1,200 kg CO₂/year'
-        },
-        medium: {
-            icon: 'fa-car-side',
-            title: 'Optimize Your Commute',
-            description: 'Carpool, combine trips, or work from home when possible',
-            impact: '-600 kg CO₂/year'
-        }
-    },
-    energy: {
-        high: {
-            icon: 'fa-lightbulb',
-            title: 'Reduce Energy Consumption',
-            description: 'Switch to LED bulbs, unplug devices, use energy-efficient appliances',
-            impact: '-800 kg CO₂/year'
-        },
-        medium: {
-            icon: 'fa-temperature-low',
-            title: 'Optimize Heating & Cooling',
-            description: 'Set AC to 24°C, use fans, improve insulation',
-            impact: '-400 kg CO₂/year'
-        }
-    },
-    diet: {
-        high: {
-            icon: 'fa-leaf',
-            title: 'Adopt Plant-Based Meals',
-            description: 'Try Meatless Mondays or reduce meat consumption by 50%',
-            impact: '-900 kg CO₂/year'
-        },
-        medium: {
-            icon: 'fa-utensils',
-            title: 'Reduce Food Waste',
-            description: 'Plan meals, store food properly, compost organic waste',
-            impact: '-300 kg CO₂/year'
-        }
-    },
-    water: {
-        high: {
-            icon: 'fa-shower',
-            title: 'Conserve Water',
-            description: 'Take shorter showers, fix leaks, install low-flow fixtures',
-            impact: '-200 kg CO₂/year'
-        }
-    },
-    waste: {
-        high: {
-            icon: 'fa-recycle',
-            title: 'Reduce Plastic & Waste',
-            description: 'Use reusable bags, bottles, and containers',
-            impact: '-250 kg CO₂/year'
-        }
-    },
-    consumption: {
-        high: {
-            icon: 'fa-shopping-bag',
-            title: 'Practice Conscious Consumption',
-            description: 'Buy only what you need, choose sustainable products',
-            impact: '-600 kg CO₂/year'
-        }
-    }
-};
-
-// Global variables
-let calculatorData = {};
-let breakdownChart = null;
-let progressChart = null;
-
-// Initialize calculator when DOM loads
+// Theme Toggle Functionality
 document.addEventListener('DOMContentLoaded', function() {
-    initCalculator();
-    loadSavedResults();
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-theme');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        body.classList.remove('dark-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+        if (body.classList.contains('dark-theme')) {
+            body.classList.remove('dark-theme');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.add('dark-theme');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+    
+    // Initialize quiz navigation
+    initQuizNavigation();
 });
 
-function initCalculator() {
-    const form = document.getElementById('impactForm');
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
+// Quiz Navigation
+function initQuizNavigation() {
+    // Initialize variables
+    let currentStep = 1;
+    const totalSteps = 5;
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const currentStepEl = document.getElementById('currentStep');
+    const formProgress = document.getElementById('formProgress');
+    const steps = document.querySelectorAll('.step');
+    const questionGroups = document.querySelectorAll('.question-group');
+
+    // Start Calculator Button
+    const startCalculatorBtn = document.getElementById('startCalculatorBtn');
+    if (startCalculatorBtn) {
+        startCalculatorBtn.addEventListener('click', function() {
+            document.getElementById('calculatorForm').scrollIntoView({ behavior: 'smooth' });
+        });
     }
-    
-    // Show tracking section if user has previous results
-    const savedResults = getSavedResults();
-    if (savedResults.length > 0) {
-        document.getElementById('trackingSection').style.display = 'block';
-        displayHistory(savedResults);
-        createProgressChart(savedResults);
+
+    // Update progress
+    function updateProgress() {
+        const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        formProgress.style.width = `${progressPercentage}%`;
+        currentStepEl.textContent = currentStep;
+        
+        // Update step indicators
+        steps.forEach(step => {
+            const stepNum = parseInt(step.getAttribute('data-step'));
+            if (stepNum === currentStep) {
+                step.classList.add('active');
+            } else if (stepNum < currentStep) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+        
+        // Show/hide navigation buttons
+        prevBtn.disabled = currentStep === 1;
+        nextBtn.style.display = currentStep === totalSteps ? 'none' : 'flex';
+        submitBtn.style.display = currentStep === totalSteps ? 'flex' : 'none';
+        
+        // Show current question group
+        questionGroups.forEach(group => {
+            const groupStep = parseInt(group.getAttribute('data-step'));
+            if (groupStep === currentStep) {
+                group.style.display = 'block';
+                setTimeout(() => {
+                    group.style.opacity = '1';
+                    group.style.transform = 'translateX(0)';
+                }, 10);
+            } else {
+                group.style.display = 'none';
+                group.style.opacity = '0';
+                group.style.transform = 'translateX(20px)';
+            }
+        });
     }
+
+    // Next button click
+    nextBtn.addEventListener('click', function() {
+        const currentGroup = document.querySelector(`.question-group[data-step="${currentStep}"]`);
+        const selects = currentGroup.querySelectorAll('select[required]');
+        let isValid = true;
+        
+        selects.forEach(select => {
+            if (!select.value) {
+                isValid = false;
+                select.style.borderColor = '#f44336';
+                setTimeout(() => {
+                    select.style.borderColor = '';
+                }, 2000);
+            }
+        });
+        
+        if (isValid) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateProgress();
+                document.getElementById('calculatorForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } else {
+            alert('Please answer all questions before proceeding.');
+        }
+    });
+
+    // Previous button click
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateProgress();
+            document.getElementById('calculatorForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    // Form submission
+    const impactForm = document.getElementById('impactForm');
+    impactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        calculateImpact();
+    });
+
+    // Initialize
+    updateProgress();
+
+    // Tooltips
+    const helpElements = document.querySelectorAll('.question-help');
+    helpElements.forEach(element => {
+        element.addEventListener('mouseenter', function() {
+            const tooltip = this.getAttribute('data-tooltip');
+            // Tooltip already handled by CSS
+        });
+    });
+
+    // Form validation
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            if (this.value) {
+                this.style.borderColor = '#4caf50';
+                setTimeout(() => {
+                    this.style.borderColor = '';
+                }, 1000);
+            }
+        });
+    });
 }
 
-function handleFormSubmit(e) {
-    e.preventDefault();
+// Calculate Impact Function
+function calculateImpact() {
+    const formData = new FormData(document.getElementById('impactForm'));
+    const data = Object.fromEntries(formData);
     
-    // Show loading state
-    showLoading();
-    
-    // Collect form data
-    const formData = new FormData(e.target);
-    calculatorData = Object.fromEntries(formData);
-    
-    // Calculate impact with delay for better UX
-    setTimeout(() => {
-        const results = calculateImpact(calculatorData);
-        displayResults(results);
-        hideLoading();
-    }, 1500);
-}
-
-function calculateImpact(data) {
-    let totalImpact = 0;
-    let breakdown = {
+    // Scoring system
+    let totalScore = 0;
+    const categoryScores = {
         transport: 0,
         energy: 0,
         diet: 0,
         water: 0,
         waste: 0
     };
-    
-    // Transportation impact
-    const transportBase = IMPACT_COEFFICIENTS.transport[data.transport] || 0;
-    const distanceMultiplier = IMPACT_COEFFICIENTS.distance[data.distance] || 1;
-    breakdown.transport = transportBase * distanceMultiplier;
-    
-    // Energy impact
-    const electricityImpact = IMPACT_COEFFICIENTS.electricity[data.electricity] || 0;
-    const hvacImpact = IMPACT_COEFFICIENTS.hvac[data.hvac] || 0;
-    breakdown.energy = electricityImpact + hvacImpact;
-    
-    // Diet impact
-    const dietBase = IMPACT_COEFFICIENTS.diet[data.diet] || 0;
-    const wasteMultiplier = IMPACT_COEFFICIENTS['food-waste'][data['food-waste']] || 1;
-    breakdown.diet = dietBase * wasteMultiplier;
-    
-    // Water impact
-    const showerImpact = IMPACT_COEFFICIENTS.shower[data.shower] || 0;
-    const conservationMultiplier = IMPACT_COEFFICIENTS['water-conservation'][data['water-conservation']] || 1;
-    breakdown.water = showerImpact * conservationMultiplier;
-    
-    // Waste impact
-    const plasticImpact = IMPACT_COEFFICIENTS.plastic[data.plastic] || 0;
-    const shoppingImpact = IMPACT_COEFFICIENTS.shopping[data.shopping] || 0;
-    breakdown.waste = plasticImpact + shoppingImpact;
-    
-    totalImpact = Object.values(breakdown).reduce((sum, value) => sum + value, 0);
-    
-    return {
-        total: Math.round(totalImpact),
-        breakdown: breakdown,
-        level: getImpactLevel(totalImpact),
-        recommendations: generateRecommendations(data, breakdown)
+
+    // Transport scoring (20 points max)
+    const transportScores = {
+        'walk': 5, 'public': 4, 'bike': 3, 'car': 2, 'multiple': 1
     };
+    const distanceScores = {
+        'low': 4, 'medium': 3, 'high': 2, 'very-high': 1
+    };
+    categoryScores.transport = transportScores[data.transport] + distanceScores[data.distance];
+    totalScore += categoryScores.transport;
+
+    // Energy scoring (20 points max)
+    const electricityScores = {
+        'low': 5, 'medium': 4, 'high': 3, 'very-high': 2
+    };
+    const hvacScores = {
+        'none': 5, 'minimal': 4, 'moderate': 3, 'heavy': 2
+    };
+    categoryScores.energy = electricityScores[data.electricity] + hvacScores[data.hvac];
+    totalScore += categoryScores.energy;
+
+    // Diet scoring (20 points max)
+    const dietScores = {
+        'vegan': 5, 'vegetarian': 4, 'pescatarian': 3, 'omnivore': 2, 'meat-heavy': 1
+    };
+    const wasteScores = {
+        'minimal': 5, 'some': 4, 'moderate': 3, 'high': 2
+    };
+    categoryScores.diet = dietScores[data.diet] + wasteScores[data['food-waste']];
+    totalScore += categoryScores.diet;
+
+    // Water scoring (20 points max)
+    const showerScores = {
+        'short': 5, 'medium': 4, 'long': 3, 'very-long': 2
+    };
+    const waterScores = {
+        'excellent': 5, 'good': 4, 'average': 3, 'poor': 2
+    };
+    categoryScores.water = showerScores[data.shower] + waterScores[data['water-conservation']];
+    totalScore += categoryScores.water;
+
+    // Waste scoring (20 points max)
+    const plasticScores = {
+        'minimal': 5, 'low': 4, 'moderate': 3, 'high': 2
+    };
+    const shoppingScores = {
+        'minimal': 5, 'conscious': 4, 'regular': 3, 'frequent': 2
+    };
+    categoryScores.waste = plasticScores[data.plastic] + shoppingScores[data.shopping];
+    totalScore += categoryScores.waste;
+
+    // Normalize to 100
+    totalScore = Math.round((totalScore / 100) * 100);
+    
+    // Show results
+    showResults(totalScore, categoryScores, data);
 }
 
-function getImpactLevel(impact) {
-    if (impact < 1500) {
-        return {
-            level: 'Excellent',
-            message: 'Your environmental impact is very low! Keep up the great work.',
-            class: 'score-excellent',
-            emoji: '🌱'
-        };
-    } else if (impact < 2500) {
-        return {
-            level: 'Good',
-            message: 'You\'re doing well, but there\'s room for improvement.',
-            class: 'score-good',
-            emoji: '🌿'
-        };
-    } else if (impact < 4000) {
-        return {
-            level: 'Average',
-            message: 'Your impact is average. Let\'s work on reducing it!',
-            class: 'score-average',
-            emoji: '⚠️'
-        };
-    } else {
-        return {
-            level: 'High',
-            message: 'Your environmental impact is high. Time to take action!',
-            class: 'score-poor',
-            emoji: '🚨'
-        };
-    }
-}
-
-function generateRecommendations(data, breakdown) {
-    const recommendations = [];
-    
-    // Transport recommendations
-    if (breakdown.transport > 2000) {
-        recommendations.push(RECOMMENDATIONS.transport.high);
-    } else if (breakdown.transport > 1000) {
-        recommendations.push(RECOMMENDATIONS.transport.medium);
-    }
-    
-    // Energy recommendations
-    if (breakdown.energy > 1500) {
-        recommendations.push(RECOMMENDATIONS.energy.high);
-    } else if (breakdown.energy > 800) {
-        recommendations.push(RECOMMENDATIONS.energy.medium);
-    }
-    
-    // Diet recommendations
-    if (breakdown.diet > 2000) {
-        recommendations.push(RECOMMENDATIONS.diet.high);
-    } else if (breakdown.diet > 1200) {
-        recommendations.push(RECOMMENDATIONS.diet.medium);
-    }
-    
-    // Water recommendations
-    if (breakdown.water > 300) {
-        recommendations.push(RECOMMENDATIONS.water.high);
-    }
-    
-    // Waste recommendations
-    if (breakdown.waste > 600) {
-        recommendations.push(RECOMMENDATIONS.waste.high);
-    }
-    
-    // Consumption recommendations
-    if (data.shopping === 'frequent' || data.shopping === 'regular') {
-        recommendations.push(RECOMMENDATIONS.consumption.high);
-    }
-    
-    return recommendations.slice(0, 5); // Limit to top 5 recommendations
-}
-
-function displayResults(results) {
-    // Show results section
+function showResults(totalScore, categoryScores, data) {
+    // Hide form, show results
     document.getElementById('calculatorForm').style.display = 'none';
     document.getElementById('resultsSection').style.display = 'block';
-    document.getElementById('resultsSection').classList.add('fade-in');
+    document.getElementById('trackingSection').style.display = 'block';
     
-    // Update score display
-    updateScoreDisplay(results);
+    // Update total score
+    document.getElementById('totalScore').textContent = totalScore;
     
-    // Create breakdown chart
-    createBreakdownChart(results.breakdown);
+    // Determine score level
+    let scoreLevel = '';
+    let scoreMessage = '';
+    let scoreColor = '';
     
-    // Update comparison
-    updateComparison(results.total);
+    if (totalScore >= 80) {
+        scoreLevel = 'Eco Warrior 🌟';
+        scoreMessage = 'Excellent! You\'re living sustainably and setting a great example for others.';
+        scoreColor = '#4caf50';
+    } else if (totalScore >= 60) {
+        scoreLevel = 'Eco Conscious 🌱';
+        scoreMessage = 'Good job! You\'re making eco-friendly choices but there\'s room for improvement.';
+        scoreColor = '#8bc34a';
+    } else if (totalScore >= 40) {
+        scoreLevel = 'Average Impact 📊';
+        scoreMessage = 'You\'re aware of environmental issues but could adopt more sustainable practices.';
+        scoreColor = '#ff9800';
+    } else {
+        scoreLevel = 'Needs Improvement 🚨';
+        scoreMessage = 'Your environmental impact is high. Consider adopting more eco-friendly habits.';
+        scoreColor = '#f44336';
+    }
     
-    // Display recommendations
-    displayRecommendations(results.recommendations);
+    document.getElementById('scoreLevel').textContent = scoreLevel;
+    document.getElementById('scoreMessage').textContent = scoreMessage;
+    document.getElementById('scoreLevel').style.color = scoreColor;
     
-    // Save results
-    saveResult(results);
+    // Update score circle
+    const scoreCircle = document.getElementById('scoreCircle');
+    scoreCircle.style.background = `conic-gradient(${scoreColor} ${totalScore * 3.6}deg, var(--border-color) 0deg)`;
+    
+    // Update user bar
+    const userBar = document.getElementById('userBar');
+    const userImpact = document.getElementById('userImpact');
+    const co2Value = Math.round((100 - totalScore) * 25); // Convert score to CO2 estimate
+    userBar.style.width = `${(co2Value / 3000) * 100}%`;
+    userImpact.textContent = `${co2Value} kg CO₂/year`;
+    
+    // Create chart
+    createChart(categoryScores);
+    
+    // Generate recommendations
+    generateRecommendations(data, totalScore);
+    
+    // Add event listeners to action buttons
+    document.getElementById('saveResultsBtn').addEventListener('click', saveResults);
+    document.getElementById('shareResultsBtn').addEventListener('click', shareResults);
+    document.getElementById('retakeQuizBtn').addEventListener('click', retakeQuiz);
     
     // Scroll to results
-    document.getElementById('resultsSection').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-    });
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-function updateScoreDisplay(results) {
-    const scoreElement = document.getElementById('totalScore');
-    const levelElement = document.getElementById('scoreLevel');
-    const messageElement = document.getElementById('scoreMessage');
-    const circleElement = document.getElementById('scoreCircle');
-    
-    // Animate score counting
-    animateCounter(scoreElement, 0, results.total, 2000);
-    
-    // Update level and message
-    levelElement.textContent = `${results.level.emoji} ${results.level.level}`;
-    levelElement.className = results.level.class;
-    messageElement.textContent = results.level.message;
-    
-    // Update circle color based on score
-    const percentage = Math.min((results.total / 5000) * 360, 360);
-    circleElement.style.background = `conic-gradient(
-        var(--primary-color) 0deg,
-        var(--primary-light) ${percentage}deg,
-        #e0e0e0 ${percentage}deg
-    )`;
-}
-
-function createBreakdownChart(breakdown) {
+function createChart(categoryScores) {
     const ctx = document.getElementById('breakdownChart').getContext('2d');
     
-    if (breakdownChart) {
-        breakdownChart.destroy();
+    // Destroy existing chart if it exists
+    if (window.breakdownChart) {
+        window.breakdownChart.destroy();
     }
     
-    const data = {
-        labels: ['Transport', 'Energy', 'Diet', 'Water', 'Waste'],
-        datasets: [{
-            data: [
-                breakdown.transport,
-                breakdown.energy,
-                breakdown.diet,
-                breakdown.water,
-                breakdown.waste
-            ],
-            backgroundColor: [
-                '#2e7d32',
-                '#388e3c',
-                '#4caf50',
-                '#66bb6a',
-                '#81c784'
-            ],
-            borderWidth: 0
-        }]
-    };
+    const colors = ['#2e7d32', '#4caf50', '#8bc34a', '#cddc39', '#ffc107'];
     
-    breakdownChart = new Chart(ctx, {
+    window.breakdownChart = new Chart(ctx, {
         type: 'doughnut',
-        data: data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateComparison(userImpact) {
-    const userBar = document.getElementById('userBar');
-    const userImpactElement = document.getElementById('userImpact');
-    const averageImpact = 2500;
-    
-    const userPercentage = Math.min((userImpact / 5000) * 100, 100);
-    
-    setTimeout(() => {
-        userBar.style.width = `${userPercentage}%`;
-        userImpactElement.textContent = `${userImpact.toLocaleString()} kg CO₂/year`;
-    }, 500);
-}
-
-function displayRecommendations(recommendations) {
-    const container = document.getElementById('recommendationsList');
-    container.innerHTML = '';
-    
-    recommendations.forEach((rec, index) => {
-        const item = document.createElement('div');
-        item.className = 'recommendation-item slide-up';
-        item.style.animationDelay = `${index * 0.1}s`;
-        
-        item.innerHTML = `
-            <div class="recommendation-icon">
-                <i class="fa-solid ${rec.icon}"></i>
-            </div>
-            <div class="recommendation-content">
-                <h4>${rec.title} <span class="impact-value">${rec.impact}</span></h4>
-                <p>${rec.description}</p>
-            </div>
-        `;
-        
-        container.appendChild(item);
-    });
-}
-
-function animateCounter(element, start, end, duration) {
-    const range = end - start;
-    const increment = range / (duration / 16);
-    let current = start;
-    
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-            current = end;
-            clearInterval(timer);
-        }
-        element.textContent = Math.floor(current);
-    }, 16);
-}
-
-function showLoading() {
-    const form = document.getElementById('calculatorForm');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating...';
-    submitBtn.disabled = true;
-}
-
-function hideLoading() {
-    // Loading is hidden when results are shown
-}
-
-// Data persistence functions
-function saveResult(results) {
-    const savedResults = getSavedResults();
-    const newResult = {
-        date: new Date().toISOString(),
-        score: results.total,
-        breakdown: results.breakdown,
-        level: results.level.level
-    };
-    
-    savedResults.push(newResult);
-    
-    // Keep only last 10 results
-    if (savedResults.length > 10) {
-        savedResults.shift();
-    }
-    
-    localStorage.setItem('ecolife_impact_results', JSON.stringify(savedResults));
-    
-    // Update tracking section
-    document.getElementById('trackingSection').style.display = 'block';
-    displayHistory(savedResults);
-    createProgressChart(savedResults);
-}
-
-function getSavedResults() {
-    const saved = localStorage.getItem('ecolife_impact_results');
-    return saved ? JSON.parse(saved) : [];
-}
-
-function loadSavedResults() {
-    const savedResults = getSavedResults();
-    if (savedResults.length > 0) {
-        document.getElementById('trackingSection').style.display = 'block';
-        displayHistory(savedResults);
-        createProgressChart(savedResults);
-    }
-}
-
-function displayHistory(results) {
-    const container = document.getElementById('historyList');
-    
-    if (results.length === 0) {
-        container.innerHTML = '<p>No previous results found. Take the quiz to start tracking!</p>';
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    results.slice(-5).reverse().forEach(result => {
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        
-        const date = new Date(result.date).toLocaleDateString();
-        
-        item.innerHTML = `
-            <div class="history-date">${date}</div>
-            <div class="history-score">${result.score} kg CO₂</div>
-        `;
-        
-        container.appendChild(item);
-    });
-}
-
-function createProgressChart(results) {
-    const ctx = document.getElementById('progressChart');
-    if (!ctx) return;
-    
-    if (progressChart) {
-        progressChart.destroy();
-    }
-    
-    const labels = results.slice(-6).map(result => 
-        new Date(result.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    );
-    
-    const data = results.slice(-6).map(result => result.score);
-    
-    progressChart = new Chart(ctx, {
-        type: 'line',
         data: {
-            labels: labels,
+            labels: ['Transport', 'Energy', 'Diet', 'Water', 'Waste'],
             datasets: [{
-                label: 'Environmental Impact (kg CO₂)',
-                data: data,
-                borderColor: '#2e7d32',
-                backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
+                data: [
+                    categoryScores.transport * 5,
+                    categoryScores.energy * 5,
+                    categoryScores.diet * 5,
+                    categoryScores.water * 5,
+                    categoryScores.waste * 5
+                ],
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
             }]
         },
         options: {
@@ -557,100 +325,214 @@ function createProgressChart(results) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'kg CO₂ per year'
+                    position: 'bottom',
+                    labels: {
+                        color: 'var(--text-primary)',
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
                     }
                 }
-            }
+            },
+            cutout: '70%'
         }
     });
 }
 
-// Action button functions
+function generateRecommendations(data, totalScore) {
+    const recommendationsList = document.getElementById('recommendationsList');
+    recommendationsList.innerHTML = '';
+    
+    const recommendations = [];
+    
+    // Transport recommendations
+    if (data.transport === 'car' || data.transport === 'multiple') {
+        recommendations.push({
+            icon: '🚌',
+            title: 'Use Public Transport',
+            description: 'Switch to public transport or carpool to reduce emissions.'
+        });
+    }
+    
+    if (data.distance === 'high' || data.distance === 'very-high') {
+        recommendations.push({
+            icon: '🚲',
+            title: 'Reduce Travel Distance',
+            description: 'Combine errands and plan efficient routes to minimize travel.'
+        });
+    }
+    
+    // Energy recommendations
+    if (data.electricity === 'high' || data.electricity === 'very-high') {
+        recommendations.push({
+            icon: '💡',
+            title: 'Switch to LED Bulbs',
+            description: 'Replace incandescent bulbs with energy-efficient LEDs.'
+        });
+    }
+    
+    if (data.hvac === 'heavy' || data.hvac === 'moderate') {
+        recommendations.push({
+            icon: '🌡️',
+            title: 'Optimize AC/Heater Use',
+            description: 'Use programmable thermostats and maintain optimal temperatures.'
+        });
+    }
+    
+    // Diet recommendations
+    if (data.diet === 'meat-heavy' || data.diet === 'omnivore') {
+        recommendations.push({
+            icon: '🥗',
+            title: 'Reduce Meat Consumption',
+            description: 'Try meatless days or plant-based alternatives.'
+        });
+    }
+    
+    if (data['food-waste'] === 'high' || data['food-waste'] === 'moderate') {
+        recommendations.push({
+            icon: '♻️',
+            title: 'Reduce Food Waste',
+            description: 'Plan meals, store food properly, and compost organic waste.'
+        });
+    }
+    
+    // Water recommendations
+    if (data.shower === 'long' || data.shower === 'very-long') {
+        recommendations.push({
+            icon: '🚿',
+            title: 'Shorten Showers',
+            description: 'Aim for 5-minute showers to save water.'
+        });
+    }
+    
+    if (data['water-conservation'] === 'poor' || data['water-conservation'] === 'average') {
+        recommendations.push({
+            icon: '💧',
+            title: 'Install Water-Saving Fixtures',
+            description: 'Use low-flow showerheads and faucet aerators.'
+        });
+    }
+    
+    // Waste recommendations
+    if (data.plastic === 'high' || data.plastic === 'moderate') {
+        recommendations.push({
+            icon: '🛍️',
+            title: 'Avoid Single-Use Plastics',
+            description: 'Use reusable bags, bottles, and containers.'
+        });
+    }
+    
+    if (data.shopping === 'frequent' || data.shopping === 'regular') {
+        recommendations.push({
+            icon: '📦',
+            title: 'Practice Conscious Consumption',
+            description: 'Buy only what you need and choose quality over quantity.'
+        });
+    }
+    
+    // Add general recommendations based on score
+    if (totalScore < 60) {
+        recommendations.push({
+            icon: '📚',
+            title: 'Learn More About Sustainability',
+            description: 'Educate yourself on environmental issues and solutions.'
+        });
+    }
+    
+    if (totalScore > 70) {
+        recommendations.push({
+            icon: '🌟',
+            title: 'Share Your Knowledge',
+            description: 'Inspire others by sharing your eco-friendly practices.'
+        });
+    }
+    
+    // Display recommendations (max 6)
+    recommendations.slice(0, 6).forEach(rec => {
+        const recItem = document.createElement('div');
+        recItem.className = 'recommendation-item';
+        recItem.innerHTML = `
+            <div class="recommendation-icon">${rec.icon}</div>
+            <div class="recommendation-content">
+                <h4>${rec.title}</h4>
+                <p>${rec.description}</p>
+            </div>
+        `;
+        recommendationsList.appendChild(recItem);
+    });
+}
+
 function saveResults() {
-    // Results are already saved automatically
-    showNotification('Results saved successfully!', 'success');
+    const totalScore = document.getElementById('totalScore').textContent;
+    const scoreLevel = document.getElementById('scoreLevel').textContent;
+    const date = new Date().toLocaleDateString();
+    
+    // In a real app, you would save to localStorage or backend
+    const result = {
+        date: date,
+        score: totalScore,
+        level: scoreLevel
+    };
+    
+    alert(`Results saved for ${date}! Score: ${totalScore} - ${scoreLevel}`);
 }
 
 function shareResults() {
-    const results = calculatorData;
     const totalScore = document.getElementById('totalScore').textContent;
+    const scoreLevel = document.getElementById('scoreLevel').textContent;
     
     if (navigator.share) {
         navigator.share({
             title: 'My Environmental Impact Score',
-            text: `I calculated my environmental impact and scored ${totalScore} kg CO₂/year! Calculate yours with EcoLife.`,
+            text: `I got ${totalScore}/100 (${scoreLevel}) on the EcoLife Environmental Impact Calculator! 🌱`,
             url: window.location.href
         });
     } else {
         // Fallback: copy to clipboard
-        const shareText = `I calculated my environmental impact and scored ${totalScore} kg CO₂/year! Calculate yours at ${window.location.href}`;
-        navigator.clipboard.writeText(shareText).then(() => {
-            showNotification('Share link copied to clipboard!', 'success');
+        const text = `My Environmental Impact Score: ${totalScore}/100 (${scoreLevel})\nTake the quiz at: ${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Results copied to clipboard! Share it with your friends.');
+        }).catch(() => {
+            alert('Could not copy to clipboard. Please manually share the results.');
         });
     }
 }
 
 function retakeQuiz() {
-    document.getElementById('resultsSection').style.display = 'none';
-    document.getElementById('calculatorForm').style.display = 'block';
-    
     // Reset form
     document.getElementById('impactForm').reset();
+    document.getElementById('calculatorForm').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('trackingSection').style.display = 'none';
     
-    // Reset button
-    const submitBtn = document.querySelector('#impactForm button[type="submit"]');
-    submitBtn.innerHTML = '<i class="fa-solid fa-calculator"></i> Calculate My Impact';
-    submitBtn.disabled = false;
+    // Reset to step 1
+    document.getElementById('currentStep').textContent = '1';
+    document.getElementById('formProgress').style.width = '20%';
+    
+    // Reset steps
+    document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active');
+    });
+    document.querySelector('.step[data-step="1"]').classList.add('active');
+    
+    // Reset question groups
+    document.querySelectorAll('.question-group').forEach((group, index) => {
+        if (index === 0) {
+            group.style.display = 'block';
+        } else {
+            group.style.display = 'none';
+        }
+    });
+    
+    // Reset navigation buttons
+    document.getElementById('prevBtn').disabled = true;
+    document.getElementById('nextBtn').style.display = 'flex';
+    document.getElementById('submitBtn').style.display = 'none';
     
     // Scroll to form
-    document.getElementById('calculatorForm').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-    });
+    document.getElementById('calculatorForm').scrollIntoView({ behavior: 'smooth' });
+    
+    // Reinitialize quiz
+    initQuizNavigation();
 }
-
-// Utility function for notifications (using existing system from main.js)
-function showNotification(message, type = 'info') {
-    // This function is defined in main.js
-    if (typeof window.showNotification === 'function') {
-        window.showNotification(message, type);
-    } else {
-        alert(message); // Fallback
-    }
-}
-
-// Reveal animations on load
-window.addEventListener('load', () => {
-  document.querySelectorAll('.fade-up').forEach(el => {
-    el.style.animationPlayState = 'running';
-  });
-});
-
-
-
-// Scroll to calculator form when hero button is clicked
-document.getElementById('startCalculatorBtn')?.addEventListener('click', () => {
-  const formSection = document.querySelector('.calculator-section');
-  if (formSection) {
-    formSection.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
-});
-
-document.getElementById("startCalculatorBtn")
-  ?.addEventListener("click", () => {
-    document
-      .querySelector(".calculator-section")
-      .scrollIntoView({ behavior: "smooth" });
-  });
-
