@@ -1,4 +1,4 @@
-<nav class="navbar" id="navbar">
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
   <div class="nav-container">
 
     <a href="#home" class="logo">
@@ -12,7 +12,7 @@
       <span id="clock-time">00:00:00</span>
     </div>
 
-    <div class="nav-toggle" id="navToggle">
+    <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
       <span></span>
       <span></span>
       <span></span>
@@ -61,19 +61,7 @@
       <li class="nav-group"><a href="pages/contact.html" class="nav-link">Contact</a></li>
 
       <li class="nav-auth">
-        <!-- Font Size Controls -->
-        <div class="font-size-controls">
-          <button class="font-size-btn font-size-decrease" data-font-decrease role="button" tabindex="0" aria-label="Decrease font size" title="Decrease Font Size">
-            <i class="fa-solid fa-minus"></i>
-          </button>
-          <button class="font-size-btn font-size-increase" data-font-increase role="button" tabindex="0" aria-label="Increase font size" title="Increase Font Size">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
-
-        <!-- Theme Toggle -->
-        <div class="theme-toggle-btn" id="themeToggle" role="button" tabindex="0" aria-label="Switch to dark mode"
-          aria-pressed="false" title="Toggle Dark Mode">
+        <div class="theme-toggle-btn" id="themeToggle" aria-label="Toggle dark mode" role="button">
           <i class="fa-solid fa-moon"></i>
         </div>
 
@@ -114,5 +102,7 @@
   navToggle.addEventListener("click", () => {
     navLinks.classList.toggle("active");
     navToggle.classList.toggle("active");
+    const isExpanded = navLinks.classList.contains("active");
+    navToggle.setAttribute("aria-expanded", isExpanded);
   });
 </script>

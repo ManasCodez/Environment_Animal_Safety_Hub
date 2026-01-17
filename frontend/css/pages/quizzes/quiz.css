@@ -189,6 +189,12 @@ button {
     font-weight: 600;
     position: relative;
     transform-origin: left;
+    text-align: left;
+}
+
+.option:focus {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 2px;
 }
 
 .option:hover {

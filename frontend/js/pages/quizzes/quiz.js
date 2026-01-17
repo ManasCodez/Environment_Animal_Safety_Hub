@@ -150,22 +150,30 @@ function loadQuestion() {
     // Clear and Animate Options
     optionsEl.innerHTML = "";
     q.o.forEach((opt, i) => {
-        let div = document.createElement("div");
-        div.className = "option";
-        div.textContent = opt;
-        div.style.animation = `popIn 0.5s ease backwards ${i * 0.1}s`; // Staggered animation
-        div.onclick = () => selectOption(div, i);
+        let btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.setAttribute("aria-label", `Option ${i + 1}: ${opt}`);
+        btn.style.animation = `popIn 0.5s ease backwards ${i * 0.1}s`; // Staggered animation
+        btn.onclick = () => selectOption(btn, i);
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectOption(btn, i);
+            }
+        });
         
         // Restore previous selection if navigating back (not implemented here but good practice)
-        if(answers[index] === i) div.classList.add("selected");
+        if(answers[index] === i) btn.classList.add("selected");
         
-        optionsEl.appendChild(div);
+        optionsEl.appendChild(btn);
     });
 }
 
 function selectOption(el, i) {
     document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
     el.classList.add("selected");
+    el.setAttribute("aria-pressed", "true");
     answers[index] = i;
     
     // Optional: Play a small click sound here

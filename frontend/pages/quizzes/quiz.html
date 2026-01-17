@@ -171,7 +171,7 @@
                 </select>
             </div>
             <br>
-            <button class="btn-primary pulse-btn" onclick="startQuiz()">Start Adventure! 🚀</button>
+            <button class="btn-primary pulse-btn" onclick="startQuiz()" aria-label="Start the eco quiz adventure">Start Adventure! 🚀</button>
         </div>
 
         <div id="quizScreen">
@@ -183,7 +183,7 @@
                 <h3 class="question" id="question">Loading...</h3>
             </div>
             <div id="options" class="options-grid"></div>
-            <button class="btn-primary nextBtn" onclick="nextQuestion()">Next Question ➡️</button>
+            <button class="btn-primary nextBtn" onclick="nextQuestion()" aria-label="Go to next question">Next Question ➡️</button>
         </div>
 
         <div id="loadingScreen">
@@ -202,19 +202,15 @@
             </div>
             <h3 id="remark"></h3>
             <div class="action-buttons">
-                <button class="btn-secondary" onclick="showReview()">📖 Review Answers</button>
-                <button class="btn-primary" onclick="location.reload()">🔄 Play Again</button>
-                <!-- WhatsApp Share Button Added Here -->
-                <button class="whatsapp-btn" id="whatsappShareBtn">
-                    <i class="fab fa-whatsapp"></i> Share Score
-                </button>
+                <button class="btn-secondary" onclick="showReview()" aria-label="Review your quiz answers">📖 Review Answers</button>
+                <button class="btn-primary" onclick="location.reload()" aria-label="Play the quiz again">🔄 Play Again</button>
             </div>
         </div>
 
         <div id="reviewScreen">
             <h2>📖 Answer Key</h2>
             <div id="reviewList" class="custom-scroll"></div>
-            <button class="btn-primary sticky-btn" onclick="location.reload()">🔄 Play Again</button>
+            <button class="btn-primary sticky-btn" onclick="location.reload()" aria-label="Play the quiz again">🔄 Play Again</button>
         </div>
 
     </div>
