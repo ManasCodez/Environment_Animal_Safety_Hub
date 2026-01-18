@@ -12,13 +12,31 @@
       <span id="clock-time">00:00:00</span>
     </div>
 
-    <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <form class="search-form" id="searchForm">
+        <input type="text" id="searchInput" placeholder="Search endangered animals, plant care, quizzes..." autocomplete="off">
+        <button type="submit" class="search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
       <span></span>
       <span></span>
       <span></span>
     </div>
 
     <ul class="nav-links" id="navLinks">
+
+      <!-- Mobile Search -->
+      <li class="nav-group mobile-search" style="display: none;">
+        <form class="mobile-search-form" id="mobileSearchForm">
+          <input type="text" id="mobileSearchInput" placeholder="Search...">
+          <button type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </li>
 
       <li class="nav-group"><a href="index.html" class="nav-link">Home</a></li>
       <li class="nav-group"><a href="#about" class="nav-link">About</a></li>
@@ -100,5 +118,38 @@
     navToggle.classList.toggle("active");
     const isExpanded = navLinks.classList.contains("active");
     navToggle.setAttribute("aria-expanded", isExpanded);
+  });
+
+  // Search Functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const mobileSearchForm = document.getElementById('mobileSearchForm');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+
+    const handleSearch = (query) => {
+      if (query.trim()) {
+        // Redirect to search results page
+        window.location.href = `pages/search.html?q=${encodeURIComponent(query)}`;
+      }
+    };
+
+    if (searchForm && searchInput) {
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSearch(searchInput.value);
+      });
+    }
+
+    if (mobileSearchForm && mobileSearchInput) {
+      mobileSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSearch(mobileSearchInput.value);
+        // Close mobile menu after search
+        navLinks.classList.remove('active');
+        navToggle.classList.remove('active');
+        navToggle.setAttribute('aria-expanded', false);
+      });
+    }
   });
 </script>

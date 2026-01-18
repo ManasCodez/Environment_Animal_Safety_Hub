@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results | EcoLife</title>
+  <link rel="icon" type="image/png" href="assets/images/others/envirnoment-logo.png">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/pages/search.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- Cursor Effect Container -->
+  <div id="cursor-container"></div>
+  <script src="js/components/loadComponents.js"></script>
+
+  <!-- Navbar Container -->
+  <div id="navbar-container"></div>
+
+  <!-- Search Results Section -->
+  <section class="search-results-section">
+    <div class="container">
+      <div class="search-header">
+        <h1><i class="fas fa-search"></i> Search Results</h1>
+        <div class="search-query-display">
+          <span id="searchQuery"></span>
+          <span id="resultsCount"></span>
+        </div>
+      </div>
+
+      <div id="searchResults" class="search-results">
+        <!-- Results will be populated by JavaScript -->
+      </div>
+
+      <div id="noResults" class="no-results" style="display: none;">
+        <i class="fas fa-search-minus"></i>
+        <h3>No results found</h3>
+        <p>Try different keywords or check your spelling.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Container -->
+  <div id="footer-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/components/component-loader.js"></script>
+  <script src="js/pages/search.js"></script>
+</body>
+</html>
