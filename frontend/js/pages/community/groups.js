@@ -28,12 +28,6 @@ function initializeGroupsPage() {
 
     // Modal functionality
     initializeModals();
-
-    // Create group functionality
-    const createGroupBtn = document.getElementById('create-group-btn');
-    if (createGroupBtn) {
-        createGroupBtn.addEventListener('click', openCreateGroupModal);
-    }
 }
 
 function initializeModals() {
@@ -146,7 +140,11 @@ function loadFeaturedGroups() {
         }
     ];
 
-    groupsGrid.innerHTML = featuredGroups.map(group => createGroupCard(group)).join('');
+    // Load custom groups from localStorage
+    const customGroups = JSON.parse(localStorage.getItem('community_groups') || '[]');
+    const allGroups = [...customGroups, ...featuredGroups];
+
+    groupsGrid.innerHTML = allGroups.map(group => createGroupCard(group)).join('');
 }
 
 function createGroupCard(group) {
@@ -187,7 +185,9 @@ function getCategoryName(category) {
         'wildlife': 'Wildlife Conservation',
         'sustainable': 'Sustainable Living',
         'education': 'Environmental Education',
-        'animal-welfare': 'Animal Welfare'
+        'animal-welfare': 'Animal Welfare',
+        'climate': 'Climate Action',
+        'ocean': 'Ocean Cleanups'
     };
     return categories[category] || category;
 }
