@@ -145,6 +145,20 @@ const sampleEvents = [
     }
 ];
 
+function getMapContainerId() {
+  if (document.getElementById('eventsMap')) return 'eventsMap';
+  if (document.getElementById('events-map')) return 'events-map';
+  return null;
+}
+
+const PAGE = {
+  LIST: !!document.getElementById('eventsList'),
+  GRID: !!document.getElementById('eventsGrid')
+};
+
+
+
+
 // ============================================
 // Global Variables
 // ============================================
@@ -194,18 +208,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // Map Initialization
 // ============================================
 function initializeMap() {
-    // Initialize map centered on India
-    map = L.map('eventsMap').setView([20.5937, 78.9629], 5);
+  const mapId = getMapContainerId();
+  if (!mapId) {
+    console.warn('No map container found on this page');
+    return;
+  }
 
-    // Add tile layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18
-    }).addTo(map);
+  map = L.map(mapId).setView([20.5937, 78.9629], 5);
 
-    // Add markers for all events
-    addMarkersToMap(filteredEvents);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(map);
+
+  addMarkersToMap(filteredEvents);
 }
+
 
 function addMarkersToMap(events) {
     // Clear existing markers
@@ -268,34 +286,33 @@ function createPopupContent(event) {
 // Events List Rendering
 // ============================================
 function renderEvents() {
-    const eventsList = document.getElementById('eventsList');
-    const eventsCount = document.getElementById('eventsCount');
+  const eventsList = document.getElementById('eventsList');
+  const eventsGrid = document.getElementById('eventsGrid');
+  const eventsCount = document.getElementById('eventsCount');
 
-    if (filteredEvents.length === 0) {
-        eventsList.innerHTML = `
-      <div class="no-events">
-        <i class="fa-solid fa-calendar-xmark"></i>
-        <h3>No events found</h3>
-        <p>Try adjusting your filters or create a new event!</p>
-      </div>
-    `;
-        eventsCount.textContent = '0 events found';
-        return;
+  // 🔹 Page does not support list layout
+  if (!eventsList && !eventsGrid) {
+    return;
+  }
+
+  const html = filteredEvents.map(event => createEventCard(event)).join('');
+
+  if (eventsList) {
+    eventsList.innerHTML = html;
+    if (eventsCount) {
+      eventsCount.textContent = `${filteredEvents.length} events found`;
     }
+  }
 
-    // Sort events by date
-    const sortedEvents = [...filteredEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+  if (eventsGrid) {
+    eventsGrid.innerHTML = html;
+  }
 
-    eventsList.innerHTML = sortedEvents.map(event => createEventCard(event)).join('');
-    eventsCount.textContent = `${filteredEvents.length} event${filteredEvents.length > 1 ? 's' : ''} found`;
-
-    // Add click events
-    document.querySelectorAll('.event-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const eventId = parseInt(card.dataset.id);
-            showEventDetails(eventId);
-        });
+  document.querySelectorAll('.event-card').forEach(card => {
+    card.addEventListener('click', () => {
+      showEventDetails(Number(card.dataset.id));
     });
+  });
 }
 
 function createEventCard(event) {
@@ -779,6 +796,13 @@ function setupEventListeners() {
         }
     });
 }
+
+
+
+
+
+
+
 
 // Export functions for global access
 window.shareEvent = shareEvent;
