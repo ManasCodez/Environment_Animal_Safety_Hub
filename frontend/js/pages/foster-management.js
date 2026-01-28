@@ -9,6 +9,7 @@ const fosterManagement = {
     animals: [],
     currentPlacementId: null,
     currentHomeId: null,
+    useDummyData: true, // Set to false when API is ready
 
     // Initialize
     init() {
@@ -83,8 +84,19 @@ const fosterManagement = {
 
     // Load dashboard statistics
     async loadDashboardStats() {
+        if (this.useDummyData) {
+            document.getElementById('stat-applications').textContent = '3';
+            document.getElementById('stat-homes').textContent = '3';
+            document.getElementById('stat-placements').textContent = '2';
+            document.getElementById('stat-adoptions').textContent = '1';
+            return;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/foster/reports/dashboard`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
 
             if (data.success) {
@@ -96,6 +108,10 @@ const fosterManagement = {
             }
         } catch (error) {
             console.error('Error loading dashboard stats:', error);
+            document.getElementById('stat-applications').textContent = '0';
+            document.getElementById('stat-homes').textContent = '0';
+            document.getElementById('stat-placements').textContent = '0';
+            document.getElementById('stat-adoptions').textContent = '0';
         }
     },
 
@@ -113,17 +129,105 @@ const fosterManagement = {
 
     // Load applications
     async loadApplications() {
+        if (this.useDummyData) {
+            this.applications = [
+                {
+                    _id: '1',
+                    applicationNumber: 'FA-2026-001',
+                    applicantInfo: {
+                        firstName: 'Sarah',
+                        lastName: 'Johnson',
+                        email: 'sarah.j@email.com',
+                        phone: '(555) 123-4567'
+                    },
+                    householdInfo: {
+                        residenceType: 'house',
+                        ownOrRent: 'own'
+                    },
+                    experience: {
+                        previousFoster: true,
+                        petOwnershipYears: 10,
+                        canHandleSpecialNeeds: true,
+                        experienceLevel: 'advanced'
+                    },
+                    approval: {
+                        status: 'approved',
+                        score: 92
+                    },
+                    createdAt: new Date('2026-01-15')
+                },
+                {
+                    _id: '2',
+                    applicationNumber: 'FA-2026-002',
+                    applicantInfo: {
+                        firstName: 'Michael',
+                        lastName: 'Chen',
+                        email: 'mchen@email.com',
+                        phone: '(555) 234-5678'
+                    },
+                    householdInfo: {
+                        residenceType: 'apartment',
+                        ownOrRent: 'rent'
+                    },
+                    experience: {
+                        previousFoster: false,
+                        petOwnershipYears: 5,
+                        canHandleSpecialNeeds: false,
+                        experienceLevel: 'intermediate'
+                    },
+                    approval: {
+                        status: 'under-review',
+                        score: 75
+                    },
+                    createdAt: new Date('2026-01-20')
+                },
+                {
+                    _id: '3',
+                    applicationNumber: 'FA-2026-003',
+                    applicantInfo: {
+                        firstName: 'Emily',
+                        lastName: 'Rodriguez',
+                        email: 'emily.r@email.com',
+                        phone: '(555) 345-6789'
+                    },
+                    householdInfo: {
+                        residenceType: 'house',
+                        ownOrRent: 'own'
+                    },
+                    experience: {
+                        previousFoster: false,
+                        petOwnershipYears: 3,
+                        canHandleSpecialNeeds: true,
+                        experienceLevel: 'beginner'
+                    },
+                    approval: {
+                        status: 'pending',
+                        score: null
+                    },
+                    createdAt: new Date('2026-01-25')
+                }
+            ];
+            this.displayApplications(this.applications);
+            return;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/foster/applications`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
 
             if (data.success) {
                 this.applications = data.data;
                 this.displayApplications(this.applications);
+            } else {
+                throw new Error(data.message || 'Failed to load applications');
             }
         } catch (error) {
             console.error('Error loading applications:', error);
-            this.showError('Failed to load applications');
+            document.getElementById('applications-list').innerHTML = 
+                `<div class="loading-message">Error: ${error.message}<br>Make sure the server is running on port 3000</div>`;
         }
     },
 
@@ -456,17 +560,99 @@ const fosterManagement = {
 
     // Load foster homes
     async loadFosterHomes() {
+        if (this.useDummyData) {
+            this.homes = [
+                {
+                    _id: '1',
+                    homeNumber: 'FH-2026-001',
+                    fosterParent: {
+                        firstName: 'Sarah',
+                        lastName: 'Johnson',
+                        email: 'sarah.j@email.com',
+                        phone: '(555) 123-4567'
+                    },
+                    status: 'active',
+                    capacity: {
+                        maximum: 3,
+                        current: 2,
+                        available: 1
+                    },
+                    specializations: ['puppies', 'medical', 'special-needs'],
+                    performance: {
+                        totalPlacements: 12,
+                        successfulAdoptions: 10,
+                        returnRate: 16.67,
+                        rating: 4.8
+                    }
+                },
+                {
+                    _id: '2',
+                    homeNumber: 'FH-2026-002',
+                    fosterParent: {
+                        firstName: 'David',
+                        lastName: 'Martinez',
+                        email: 'david.m@email.com',
+                        phone: '(555) 987-6543'
+                    },
+                    status: 'available',
+                    capacity: {
+                        maximum: 2,
+                        current: 0,
+                        available: 2
+                    },
+                    specializations: ['kittens', 'senior'],
+                    performance: {
+                        totalPlacements: 8,
+                        successfulAdoptions: 7,
+                        returnRate: 12.5,
+                        rating: 4.5
+                    }
+                },
+                {
+                    _id: '3',
+                    homeNumber: 'FH-2026-003',
+                    fosterParent: {
+                        firstName: 'Lisa',
+                        lastName: 'Thompson',
+                        email: 'lisa.t@email.com',
+                        phone: '(555) 456-7890'
+                    },
+                    status: 'full',
+                    capacity: {
+                        maximum: 1,
+                        current: 1,
+                        available: 0
+                    },
+                    specializations: ['behavioral'],
+                    performance: {
+                        totalPlacements: 5,
+                        successfulAdoptions: 4,
+                        returnRate: 20,
+                        rating: 4.2
+                    }
+                }
+            ];
+            this.displayFosterHomes(this.homes);
+            return;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/foster/homes`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
 
             if (data.success) {
                 this.homes = data.data;
                 this.displayFosterHomes(this.homes);
+            } else {
+                throw new Error(data.message || 'Failed to load homes');
             }
         } catch (error) {
             console.error('Error loading foster homes:', error);
-            this.showError('Failed to load foster homes');
+            document.getElementById('homes-list').innerHTML = 
+                `<div class="loading-message">Error: ${error.message}</div>`;
         }
     },
 
@@ -506,6 +692,57 @@ const fosterManagement = {
 
                 ${home.specializations && home.specializations.length > 0 ? `
                     <div class="specializations">
+        if (this.useDummyData) {
+            this.placements = [
+                {
+                    _id: '1',
+                    placementNumber: 'PL-2026-001',
+                    animalInfo: {
+                        name: 'Max',
+                        species: 'Dog',
+                        breed: 'Golden Retriever',
+                        age: 2
+                    },
+                    fosterHomeId: { homeNumber: 'FH-2026-001' },
+                    status: 'active',
+                    matchingScore: 95,
+                    placementDate: new Date('2026-01-10')
+                },
+                {
+                    _id: '2',
+                    placementNumber: 'PL-2026-002',
+                    animalInfo: {
+                        name: 'Luna',
+                        species: 'Cat',
+                        breed: 'Siamese',
+                        age: 1
+                    },
+                    fosterHomeId: { homeNumber: 'FH-2026-003' },
+                    status: 'active',
+                    matchingScore: 88,
+                    placementDate: new Date('2026-01-18')
+                },
+                {
+                    _id: '3',
+                    placementNumber: 'PL-2025-045',
+                    animalInfo: {
+                        name: 'Bella',
+                        species: 'Dog',
+                        breed: 'Labrador',
+                        age: 3
+                    },
+                    fosterHomeId: { homeNumber: 'FH-2026-001' },
+                    status: 'completed',
+                    matchingScore: 92,
+                    outcome: { type: 'adopted' },
+                    placementDate: new Date('2025-11-15'),
+                    actualEndDate: new Date('2026-01-05')
+                }
+            ];
+            this.displayPlacements(this.placements);
+            return;
+        }
+
                         ${home.specializations.map(spec => 
                             `<span class="specialization-tag">${spec}</span>`
                         ).join('')}
@@ -584,15 +821,21 @@ const fosterManagement = {
     async loadPlacements() {
         try {
             const response = await fetch(`${API_BASE_URL}/foster/placements`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
 
             if (data.success) {
                 this.placements = data.data;
                 this.displayPlacements(this.placements);
+            } else {
+                throw new Error(data.message || 'Failed to load placements');
             }
         } catch (error) {
             console.error('Error loading placements:', error);
-            this.showError('Failed to load placements');
+            document.getElementById('placements-list').innerHTML = 
+                `<div class="loading-message">Error: ${error.message}</div>`;
         }
     },
 
@@ -722,6 +965,22 @@ const fosterManagement = {
         } catch (error) {
             console.error('Error creating placement:', error);
             this.showError('Failed to create placement');
+        if (this.useDummyData) {
+            this.animals = [
+                { _id: '1', name: 'Charlie', species: 'Dog', breed: 'Beagle', age: 4, size: 'medium', temperament: 'friendly' },
+                { _id: '2', name: 'Whiskers', species: 'Cat', breed: 'Persian', age: 2, size: 'small', temperament: 'calm' },
+                { _id: '3', name: 'Rocky', species: 'Dog', breed: 'German Shepherd', age: 5, size: 'large', temperament: 'protective' },
+                { _id: '4', name: 'Mittens', species: 'Cat', breed: 'Tabby', age: 1, size: 'small', temperament: 'playful' }
+            ];
+            
+            const select = document.getElementById('matching-animal-select');
+            if (select) {
+                select.innerHTML = '<option value="">-- Select Animal --</option>' +
+                    this.animals.map(a => `<option value="${a._id}">${a.name} (${a.species})</option>`).join('');
+            }
+            return;
+        }
+
         }
     },
 
